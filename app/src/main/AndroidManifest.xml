@@ -25,30 +25,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <meta-data
+
+		<meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBIqD3e1dEBHyoHOxpz36utxPrKdd_nu6c" />
 
-        <activity android:name=".MainActivity">
+		<!-- UI controls to pick location, distance, contact and message. 
+			 starts StartProgramActivity and HereIAmService when all data is filled in and start button is pressed -->
+		<activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+		<!-- Display parameters picked in MainActivity along with cancel button.
+			 When cancel button is pressed, stops HereIAmService -->
         <activity
             android:name=".StartProgramActivity"
             android:label="@string/title_activity_start_program"
             android:theme="@style/AppTheme.NoActionBar" />
 
+		<!-- Service to track distance to destination and send sms if phone is within target distance -->
         <service
             android:name=".HereIAmService"
             android:enabled="true"
             android:exported="true" />
     </application>
-
-
 </manifest>

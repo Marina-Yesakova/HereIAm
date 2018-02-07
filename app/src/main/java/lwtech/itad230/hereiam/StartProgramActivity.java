@@ -15,11 +15,17 @@ public class StartProgramActivity extends AppCompatActivity {
 
     public static final String CANCEL_START_PROGRAM_ACTIVITY = "Cancel_StartProgramActivity";
 
+	/**
+     * Data passed from MainActivity
+     */
     private TextView contactView;
     private TextView messageView;
     private TextView distanceView;
     private TextView destinationView;
 
+	/**
+     * If we are told to finish we finish
+     */
     private BroadcastReceiver mCancelMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -27,6 +33,10 @@ public class StartProgramActivity extends AppCompatActivity {
         }
     };
 
+	/**
+     * Populate local state from data passed from MainActivity.
+	 * Register BroadcastReceiver to finish this Activity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,12 +66,18 @@ public class StartProgramActivity extends AppCompatActivity {
         registerReceiver(mCancelMessageReceiver, new IntentFilter(CANCEL_START_PROGRAM_ACTIVITY));
     }
 
+	/**
+     * If pressed cancel button, stop HereIAmService and finish StartProgramActivity
+     */
     protected void onCancelButtonClick(View v) {
         Log.d(LOGTAG, "...onCancelButtonClick...");
         stopService(new Intent(StartProgramActivity.this, HereIAmService.class));
         finish();
     }
 
+	/**
+     * When window is closed unregister mCancelMessageReceiver
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

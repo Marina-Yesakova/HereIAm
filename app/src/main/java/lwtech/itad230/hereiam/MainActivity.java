@@ -31,10 +31,13 @@ public class MainActivity extends Activity {
      * Request code passed to the intent to identify its result when it returns.
      */
     private static final int REQUEST_PLACE_PICKER = 1;
-    static final int REQUEST_SELECT_CONTACT = 2;
+    private static final int REQUEST_SELECT_CONTACT = 2;
     private static final int REQUEST_LOCATION = 3;
     private static final int REQUEST_SMS = 4;
 
+	/**
+     * UI controls 
+     */
     private TextView contactName;
     private EditText messageView;
     private String contactPhone;
@@ -42,21 +45,33 @@ public class MainActivity extends Activity {
     private String distance;
     private TextView destinationView;
     private String destination;
-    Button start;
+    private Button start;
 
-    boolean contactPicked = false;
-    boolean messagePicked = false;
-    boolean distancePicked = false;
-    boolean destinationPicked = false;
+	/**
+     * Internal state to enable start button
+     */
+    private boolean contactPicked = false;
+    private boolean messagePicked = false;
+    private boolean distancePicked = false;
+    private boolean destinationPicked = false;
 
+	/**
+     * Protocol to pass data to StartProgramActivity 
+     */
     public static final String EXTRA_CONTACT = "Contact result";
     public static final String EXTRA_MESSAGE = "Message View";
-    public static final String EXTRA_DISTANCE = "Distanse Message";
+    public static final String EXTRA_DISTANCE = "Distance Message";
     public static final String EXTRA_DESTINATION = "Target Destination";
     public static final String EXTRA_COORDINATE = "Coordinate";
 
+	/**
+     * Protocol to sent completion message from HereIAmService to MainActivity
+     */
     public static final String SMS_SENT = "Sms_Sent";
 
+	/**
+     * Displays message sent notification when message is sent by hereIamService
+     */
     private BroadcastReceiver mSmsSentMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -64,6 +79,9 @@ public class MainActivity extends Activity {
         }
     };
 
+	/**
+     *  Initializes UI controls and registers mSmsSentMessageReceiver
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOGTAG, "...onCreate...");
@@ -90,9 +108,11 @@ public class MainActivity extends Activity {
             public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
                 progress = progresValue;
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 distanceView.setText("Distance: " + progress + " meters");
@@ -107,12 +127,18 @@ public class MainActivity extends Activity {
         registerReceiver(mSmsSentMessageReceiver, new IntentFilter(SMS_SENT));
     }
 
+	/**
+     * default implementation
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         Log.d(LOGTAG, "...onSaveInstanceState...");
     }
 
+	/**
+     * Calling Google's PlacePicker
+     */
     public void onOpenMapButtonClick(View v) {
         Log.d(LOGTAG, "...onOpenMapButtonClick... ACTION_PICK_PLACE");
         // Use the PlacePicker Builder to construct an Intent.
@@ -131,13 +157,10 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Extracts data from PlacePicker result.
+     * Extracts data from PlacePicker or search contact result.
      * This method is called when an Intent has been started by calling startActivityForResult.
-     * The Intent for the PlacePicker is started with REQUEST_PLACE_PICKER or REQUEST_SELECT_CONTACT request code.
+     * The Intent for the PlacePicker is started with REQUEST_PLACE_PICKER, and for search contact it's started with REQUEST_SELECT_CONTACT request code.
      * When a result with this request code is received in this method, its data is extracted.
-     * @param requestCode
-     * @param resultCode
-     * @param data
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -158,12 +181,11 @@ public class MainActivity extends Activity {
                 if (nameContainsCoordinates && !addressIsEmpty) {
                     name = "";
                 }
-                destinationView.setText(name + " " + address);
 
+                destinationView.setText(name + " " + address);
                 destination = place.getLatLng().latitude + "," + place.getLatLng().longitude;
                 destinationPicked = true;
                 checkIfStartEnabled();
-
                 final String placeId = place.getId();
                 Log.d(LOGTAG, "Place selected: " + placeId + " (" + name.toString() + ")");
             } else {
@@ -192,6 +214,9 @@ public class MainActivity extends Activity {
         Log.d(LOGTAG, "onActivityResult end");
     }
 
+	/**
+     * Calling Google's search contacts
+     */
     protected void onSearchContactClick (View view) {
         Log.d(LOGTAG, "...onSearchContactClick...");
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
@@ -200,6 +225,9 @@ public class MainActivity extends Activity {
         }
     }
 
+	/**
+     * Starts HereIAmService and switches to startProgramActivity
+     */
     protected void onStartButtonClick(View v) {
         String messageViewText = messageView.getText().toString();
         Log.d(LOGTAG, "...onStartButtonClick..." + " " + contactName.getText() + " " + messageViewText + " " + distance + " " + destination + " " + contactPhone);
@@ -219,11 +247,17 @@ public class MainActivity extends Activity {
         startActivity(intentActivity);
     }
 
+	/**
+     * Enable start button when contact, distance, destination picked
+     */
     public void checkIfStartEnabled() {
         Log.d(LOGTAG, "checkIfStartEnabled" + " " + contactPicked + " " + messagePicked + " " + distancePicked + " " + destinationPicked);
         start.setEnabled(contactPicked && distancePicked && destinationPicked);
     }
 
+	/**
+     * Checks that the app has necessary permissions 
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -250,6 +284,9 @@ public class MainActivity extends Activity {
         }
     }
 
+	/**
+     * Verifies that the app was granted necessary permissions
+     */
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_LOCATION) {
             if(grantResults.length == 1

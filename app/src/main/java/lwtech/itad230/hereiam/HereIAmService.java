@@ -24,20 +24,33 @@ public class HereIAmService extends Service implements
 {
     private final static String LOGTAG = "HereIAmService";
 
+	/**
+     * Helper variables to query current location 
+     */
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
+	/**
+     * Data passed from MainActivity  
+     */
     private Location mDestinationLocation;
     private double targetDistance;
     private String message;
     private String phone;
 
+	/**
+     * Default implementation
+     */
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(LOGTAG, "...onBind...");
         return null;
     }
 
+	/**
+     * Populate local state from data passed from MainActivity.
+	 * Connect Google API Client to query current location
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOGTAG, "...onStartCommand...");
@@ -65,11 +78,13 @@ public class HereIAmService extends Service implements
         return super.onStartCommand(intent,flags,startId);
     }
 
+	/**
+     * Once we are connected to Google API client we ask it location updates every 2 - 4 seconds. 
+     */
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(LOGTAG, "...onConnected...");
-        int permissionCheck;
-        permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionCheck == PackageManager.PERMISSION_DENIED) {
             Log.d(LOGTAG, "...onConnected... PermissionCheck failed");
             return;
@@ -89,11 +104,22 @@ public class HereIAmService extends Service implements
         Log.d(LOGTAG, "...onConnected... Success");
     }
 
+	/**
+     * Default implementation
+     */
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOGTAG, "...onConnectionSuspended...");
     }
 
+	/**
+     * Once we received location change notification from Google API Client 
+	 * we check if new location is within target distance from destination.
+	 * If so:
+	 * 1) we send sms to target contact 
+	 * 2) notify MainActivity of that event and stop HereIAmService
+	 * 3) notify StartProgramActivity that it should finish itself
+     */
     @Override
     public void onLocationChanged(Location location) {
         Log.d(LOGTAG, "...onLocationChanged...");
@@ -117,11 +143,17 @@ public class HereIAmService extends Service implements
         }
     }
 
+	/**
+     * Default implementation
+     */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(LOGTAG, "...onConnectionFailed...");
     }
 
+	/**
+     * We disconnect Google API client when service stops 
+     */
     @Override
     public void onDestroy() {
         Log.d(LOGTAG, "...onDestroy...");
